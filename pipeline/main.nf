@@ -1,11 +1,12 @@
 #!/usr/bin/env nextflow
-// hash:sha256:ccb0b80f0fa2c67ab770c94a623c333e99edbec0dfe92eaea5a597ef05c173d0
+// hash:sha256:b884a9b986ad192e081e2e60b1d44e3febcb12dc75fa476f3bda27e6676f2035
 
 nextflow.enable.dsl = 1
 
 movies_to_create_model___toy_pipeline_1 = channel.fromPath("../data/movies/*", type: 'any', relative: true)
-capsule_create_model_toy_pipeline_1_to_capsule_create_chunks_toy_pipeline_2_2 = channel.create()
-capsule_create_chunks_toy_pipeline_2_to_capsule_run_inference_toy_pipeline_3_3 = channel.create()
+json_chunks_to_create_chunks___toy_pipeline_2 = channel.fromPath("../data/json_chunks/*", type: 'any', relative: true)
+capsule_create_model_toy_pipeline_1_to_capsule_create_chunks_toy_pipeline_2_3 = channel.create()
+capsule_create_chunks_toy_pipeline_2_to_capsule_run_inference_toy_pipeline_3_4 = channel.create()
 
 // capsule - Create Model - Toy Pipeline
 process capsule_create_model_toy_pipeline_1 {
@@ -19,7 +20,7 @@ process capsule_create_model_toy_pipeline_1 {
 	val path1 from movies_to_create_model___toy_pipeline_1
 
 	output:
-	path 'capsule/results/*' into capsule_create_model_toy_pipeline_1_to_capsule_create_chunks_toy_pipeline_2_2
+	path 'capsule/results/*' into capsule_create_model_toy_pipeline_1_to_capsule_create_chunks_toy_pipeline_2_3
 
 	script:
 	"""
@@ -57,10 +58,11 @@ process capsule_create_chunks_toy_pipeline_2 {
 	memory '8 GB'
 
 	input:
-	path 'capsule/data/' from capsule_create_model_toy_pipeline_1_to_capsule_create_chunks_toy_pipeline_2_2
+	val path2 from json_chunks_to_create_chunks___toy_pipeline_2
+	path 'capsule/data/' from capsule_create_model_toy_pipeline_1_to_capsule_create_chunks_toy_pipeline_2_3
 
 	output:
-	path 'capsule/results/*' into capsule_create_chunks_toy_pipeline_2_to_capsule_run_inference_toy_pipeline_3_3
+	path 'capsule/results/*' into capsule_create_chunks_toy_pipeline_2_to_capsule_run_inference_toy_pipeline_3_4
 
 	script:
 	"""
@@ -72,7 +74,7 @@ process capsule_create_chunks_toy_pipeline_2 {
 	mkdir -p capsule/results
 	mkdir -p capsule/scratch
 
-	ln -s /tmp/data/json_chunks capsule/data/json_chunks # id: f91575fb-5a4d-427f-a72e-99222765bc22
+	ln -s /tmp/data/json_chunks/$path2 capsule/data/$path2 # id: f91575fb-5a4d-427f-a72e-99222765bc22
 	
 	echo "[${task.tag}] cloning git repo..."
 	git clone "https://\$GIT_ACCESS_TOKEN@acmecorp-demo.codeocean.com/capsule-8969161.git" capsule-repo
@@ -100,7 +102,7 @@ process capsule_run_inference_toy_pipeline_3 {
 	publishDir "$RESULTS_PATH", saveAs: { filename -> new File(filename).getName() }
 
 	input:
-	path 'capsule/data/' from capsule_create_chunks_toy_pipeline_2_to_capsule_run_inference_toy_pipeline_3_3.flatten()
+	path 'capsule/data/' from capsule_create_chunks_toy_pipeline_2_to_capsule_run_inference_toy_pipeline_3_4.flatten()
 
 	output:
 	path 'capsule/results/*'
