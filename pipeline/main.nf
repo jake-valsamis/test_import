@@ -1,5 +1,5 @@
 #!/usr/bin/env nextflow
-// hash:sha256:b884a9b986ad192e081e2e60b1d44e3febcb12dc75fa476f3bda27e6676f2035
+// hash:sha256:444bff2628f9ad304e5a42477721df4c61150615b0ea67fd2899a384d4c77858
 
 nextflow.enable.dsl = 1
 
@@ -7,6 +7,7 @@ movies_to_create_model___toy_pipeline_1 = channel.fromPath("../data/movies/*", t
 json_chunks_to_create_chunks___toy_pipeline_2 = channel.fromPath("../data/json_chunks/*", type: 'any', relative: true)
 capsule_create_model_toy_pipeline_1_to_capsule_create_chunks_toy_pipeline_2_3 = channel.create()
 capsule_create_chunks_toy_pipeline_2_to_capsule_run_inference_toy_pipeline_3_4 = channel.create()
+capsule_run_inference_toy_pipeline_3_to_capsule_merge_chunks_toy_pipeline_4_5 = channel.create()
 
 // capsule - Create Model - Toy Pipeline
 process capsule_create_model_toy_pipeline_1 {
@@ -99,10 +100,48 @@ process capsule_run_inference_toy_pipeline_3 {
 	cpus 1
 	memory '8 GB'
 
+	input:
+	path 'capsule/data/' from capsule_create_chunks_toy_pipeline_2_to_capsule_run_inference_toy_pipeline_3_4.flatten()
+
+	output:
+	path 'capsule/results/*' into capsule_run_inference_toy_pipeline_3_to_capsule_merge_chunks_toy_pipeline_4_5
+
+	script:
+	"""
+	#!/usr/bin/env bash
+	set -e
+
+	mkdir -p capsule
+	mkdir -p capsule/data
+	mkdir -p capsule/results
+	mkdir -p capsule/scratch
+
+	echo "[${task.tag}] cloning git repo..."
+	git clone "https://\$GIT_ACCESS_TOKEN@acmecorp-demo.codeocean.com/capsule-1228581.git" capsule-repo
+	mv capsule-repo/code capsule/code
+	rm -rf capsule-repo
+
+	echo "[${task.tag}] running capsule..."
+	cd capsule/code
+	chmod +x run
+	./run
+
+	echo "[${task.tag}] completed!"
+	"""
+}
+
+// capsule - Merge Chunks - Toy Pipeline
+process capsule_merge_chunks_toy_pipeline_4 {
+	tag 'capsule-2285849'
+	container 'registry.acmecorp-demo.codeocean.com/capsule/852a2f3a-052b-41ca-a338-8dfcbae1fefc'
+
+	cpus 1
+	memory '8 GB'
+
 	publishDir "$RESULTS_PATH", saveAs: { filename -> new File(filename).getName() }
 
 	input:
-	path 'capsule/data/' from capsule_create_chunks_toy_pipeline_2_to_capsule_run_inference_toy_pipeline_3_4.flatten()
+	path 'capsule/data/' from capsule_run_inference_toy_pipeline_3_to_capsule_merge_chunks_toy_pipeline_4_5.collect()
 
 	output:
 	path 'capsule/results/*'
@@ -118,7 +157,7 @@ process capsule_run_inference_toy_pipeline_3 {
 	mkdir -p capsule/scratch
 
 	echo "[${task.tag}] cloning git repo..."
-	git clone "https://\$GIT_ACCESS_TOKEN@acmecorp-demo.codeocean.com/capsule-1228581.git" capsule-repo
+	git clone "https://\$GIT_ACCESS_TOKEN@acmecorp-demo.codeocean.com/capsule-2285849.git" capsule-repo
 	mv capsule-repo/code capsule/code
 	rm -rf capsule-repo
 
