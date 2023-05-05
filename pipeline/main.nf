@@ -1,13 +1,13 @@
 #!/usr/bin/env nextflow
-// hash:sha256:2035fa0bf1f55bba481c37e51037559326cb9b756a00e4a0f0fe9828bc4196d7
+// hash:sha256:e2c8f006f5d443fd5dd06eee7441d83b8ef7da160fa812c247def931c77d0e1c
 
 nextflow.enable.dsl = 1
 
 movies_to_create_model___toy_pipeline_1 = channel.fromPath("../data/movies/*", type: 'any', relative: true)
 capsule_create_model_toy_pipeline_1_to_capsule_create_chunks_toy_pipeline_2_2 = channel.create()
 capsule_create_chunks_toy_pipeline_2_to_capsule_run_inference_toy_pipeline_3_3 = channel.create()
-capsule_run_inference_toy_pipeline_3_to_capsule_merge_chunks_toy_pipeline_4_4 = channel.create()
-capsule_merge_chunks_toy_pipeline_4_to_capsule_merge_chunks_toy_pipeline_5_5 = channel.create()
+capsule_group_chunks_toy_pipeline_6_to_capsule_merge_chunks_toy_pipeline_5_4 = channel.create()
+capsule_run_inference_toy_pipeline_3_to_capsule_group_chunks_toy_pipeline_6_5 = channel.create()
 
 // capsule - Create Model - Toy Pipeline
 process capsule_create_model_toy_pipeline_1 {
@@ -111,7 +111,7 @@ process capsule_run_inference_toy_pipeline_3 {
 	path 'capsule/data/' from capsule_create_chunks_toy_pipeline_2_to_capsule_run_inference_toy_pipeline_3_3.flatten()
 
 	output:
-	path 'capsule/results/*' into capsule_run_inference_toy_pipeline_3_to_capsule_merge_chunks_toy_pipeline_4_4
+	path 'capsule/results/*' into capsule_run_inference_toy_pipeline_3_to_capsule_group_chunks_toy_pipeline_6_5
 
 	script:
 	"""
@@ -143,49 +143,6 @@ process capsule_run_inference_toy_pipeline_3 {
 }
 
 // capsule - Merge Chunks - Toy Pipeline
-process capsule_merge_chunks_toy_pipeline_4 {
-	tag 'capsule-2285849'
-	container 'registry.acmecorp-demo.codeocean.com/capsule/852a2f3a-052b-41ca-a338-8dfcbae1fefc'
-
-	cpus 1
-	memory '8 GB'
-
-	input:
-	path 'capsule/data/' from capsule_run_inference_toy_pipeline_3_to_capsule_merge_chunks_toy_pipeline_4_4.collect()
-
-	output:
-	path 'capsule/results/*' into capsule_merge_chunks_toy_pipeline_4_to_capsule_merge_chunks_toy_pipeline_5_5
-
-	script:
-	"""
-	#!/usr/bin/env bash
-	set -e
-
-	export CO_CAPSULE_ID=852a2f3a-052b-41ca-a338-8dfcbae1fefc
-	export CO_CPUS=1
-	export CO_MEMORY=8589934592
-
-	mkdir -p capsule
-	mkdir -p capsule/data
-	mkdir -p capsule/results
-	mkdir -p capsule/scratch
-
-	echo "[${task.tag}] cloning git repo..."
-	git clone "https://\$GIT_ACCESS_TOKEN@acmecorp-demo.codeocean.com/capsule-2285849.git" capsule-repo
-	git -C capsule-repo checkout 6d73679e8fb7f482433f93aff39df26f13da913d --quiet
-	mv capsule-repo/code capsule/code
-	rm -rf capsule-repo
-
-	echo "[${task.tag}] running capsule..."
-	cd capsule/code
-	chmod +x run
-	./run
-
-	echo "[${task.tag}] completed!"
-	"""
-}
-
-// capsule - Merge Chunks - Toy Pipeline
 process capsule_merge_chunks_toy_pipeline_5 {
 	tag 'capsule-0223110'
 	container 'registry.acmecorp-demo.codeocean.com/capsule/cfc09b9d-c5b8-491a-81b4-db699a78ed92'
@@ -196,7 +153,7 @@ process capsule_merge_chunks_toy_pipeline_5 {
 	publishDir "$RESULTS_PATH", saveAs: { filename -> new File(filename).getName() }
 
 	input:
-	path 'capsule/data/' from capsule_merge_chunks_toy_pipeline_4_to_capsule_merge_chunks_toy_pipeline_5_5.flatten()
+	path 'capsule/data/' from capsule_group_chunks_toy_pipeline_6_to_capsule_merge_chunks_toy_pipeline_5_4.flatten()
 
 	output:
 	path 'capsule/results/*'
@@ -218,6 +175,49 @@ process capsule_merge_chunks_toy_pipeline_5 {
 	echo "[${task.tag}] cloning git repo..."
 	git clone "https://\$GIT_ACCESS_TOKEN@acmecorp-demo.codeocean.com/capsule-0223110.git" capsule-repo
 	git -C capsule-repo checkout 40fe5e95fc4bee27f92e1969db7a75d4aabe06f2 --quiet
+	mv capsule-repo/code capsule/code
+	rm -rf capsule-repo
+
+	echo "[${task.tag}] running capsule..."
+	cd capsule/code
+	chmod +x run
+	./run
+
+	echo "[${task.tag}] completed!"
+	"""
+}
+
+// capsule - Group Chunks - Toy Pipeline
+process capsule_group_chunks_toy_pipeline_6 {
+	tag 'capsule-2285849'
+	container 'registry.acmecorp-demo.codeocean.com/capsule/852a2f3a-052b-41ca-a338-8dfcbae1fefc'
+
+	cpus 1
+	memory '8 GB'
+
+	input:
+	path 'capsule/data/' from capsule_run_inference_toy_pipeline_3_to_capsule_group_chunks_toy_pipeline_6_5.collect()
+
+	output:
+	path 'capsule/results/*' into capsule_group_chunks_toy_pipeline_6_to_capsule_merge_chunks_toy_pipeline_5_4
+
+	script:
+	"""
+	#!/usr/bin/env bash
+	set -e
+
+	export CO_CAPSULE_ID=852a2f3a-052b-41ca-a338-8dfcbae1fefc
+	export CO_CPUS=1
+	export CO_MEMORY=8589934592
+
+	mkdir -p capsule
+	mkdir -p capsule/data
+	mkdir -p capsule/results
+	mkdir -p capsule/scratch
+
+	echo "[${task.tag}] cloning git repo..."
+	git clone "https://\$GIT_ACCESS_TOKEN@acmecorp-demo.codeocean.com/capsule-2285849.git" capsule-repo
+	git -C capsule-repo checkout 6d73679e8fb7f482433f93aff39df26f13da913d --quiet
 	mv capsule-repo/code capsule/code
 	rm -rf capsule-repo
 
