@@ -1,5 +1,5 @@
 #!/usr/bin/env nextflow
-// hash:sha256:522118178379837f8d3cb448bf3517e5ccfee4423f7dd71f92aa07c293f2c2cb
+// hash:sha256:2035fa0bf1f55bba481c37e51037559326cb9b756a00e4a0f0fe9828bc4196d7
 
 nextflow.enable.dsl = 1
 
@@ -28,12 +28,16 @@ process capsule_create_model_toy_pipeline_1 {
 	#!/usr/bin/env bash
 	set -e
 
+	export CO_CAPSULE_ID=0333268e-299b-4d97-8c5b-04846a3584d4
+	export CO_CPUS=1
+	export CO_MEMORY=8589934592
+
 	mkdir -p capsule
 	mkdir -p capsule/data
 	mkdir -p capsule/results
 	mkdir -p capsule/scratch
 
-	ln -s /tmp/data/movies/$path1 capsule/data/$path1 # id: e88f736d-3716-4ab8-b603-64d6258e1aef
+	ln -s "/tmp/data/movies/$path1" "capsule/data/$path1" # id: e88f736d-3716-4ab8-b603-64d6258e1aef
 	
 	echo "[${task.tag}] cloning git repo..."
 	git clone "https://\$GIT_ACCESS_TOKEN@acmecorp-demo.codeocean.com/capsule-3996375.git" capsule-repo
@@ -69,12 +73,16 @@ process capsule_create_chunks_toy_pipeline_2 {
 	#!/usr/bin/env bash
 	set -e
 
+	export CO_CAPSULE_ID=e7712b75-49ea-454b-91ac-e2eae46b22da
+	export CO_CPUS=1
+	export CO_MEMORY=8589934592
+
 	mkdir -p capsule
 	mkdir -p capsule/data
 	mkdir -p capsule/results
 	mkdir -p capsule/scratch
 
-	ln -s /tmp/data/json_chunks capsule/data/json_chunks # id: f91575fb-5a4d-427f-a72e-99222765bc22
+	ln -s "/tmp/data/json_chunks" "capsule/data/json_chunks" # id: f91575fb-5a4d-427f-a72e-99222765bc22
 	
 	echo "[${task.tag}] cloning git repo..."
 	git clone "https://\$GIT_ACCESS_TOKEN@acmecorp-demo.codeocean.com/capsule-8969161.git" capsule-repo
@@ -110,6 +118,10 @@ process capsule_run_inference_toy_pipeline_3 {
 	#!/usr/bin/env bash
 	set -e
 
+	export CO_CAPSULE_ID=a204db74-b0c1-4b0f-83d6-e445fa756b76
+	export CO_CPUS=1
+	export CO_MEMORY=8589934592
+
 	mkdir -p capsule
 	mkdir -p capsule/data
 	mkdir -p capsule/results
@@ -117,6 +129,7 @@ process capsule_run_inference_toy_pipeline_3 {
 
 	echo "[${task.tag}] cloning git repo..."
 	git clone "https://\$GIT_ACCESS_TOKEN@acmecorp-demo.codeocean.com/capsule-1228581.git" capsule-repo
+	git -C capsule-repo checkout 43146cfe7870c7cf40ce4313ffb12e51329ea292 --quiet
 	mv capsule-repo/code capsule/code
 	rm -rf capsule-repo
 
@@ -148,6 +161,10 @@ process capsule_merge_chunks_toy_pipeline_4 {
 	#!/usr/bin/env bash
 	set -e
 
+	export CO_CAPSULE_ID=852a2f3a-052b-41ca-a338-8dfcbae1fefc
+	export CO_CPUS=1
+	export CO_MEMORY=8589934592
+
 	mkdir -p capsule
 	mkdir -p capsule/data
 	mkdir -p capsule/results
@@ -155,6 +172,7 @@ process capsule_merge_chunks_toy_pipeline_4 {
 
 	echo "[${task.tag}] cloning git repo..."
 	git clone "https://\$GIT_ACCESS_TOKEN@acmecorp-demo.codeocean.com/capsule-2285849.git" capsule-repo
+	git -C capsule-repo checkout 6d73679e8fb7f482433f93aff39df26f13da913d --quiet
 	mv capsule-repo/code capsule/code
 	rm -rf capsule-repo
 
@@ -188,6 +206,10 @@ process capsule_merge_chunks_toy_pipeline_5 {
 	#!/usr/bin/env bash
 	set -e
 
+	export CO_CAPSULE_ID=cfc09b9d-c5b8-491a-81b4-db699a78ed92
+	export CO_CPUS=1
+	export CO_MEMORY=8589934592
+
 	mkdir -p capsule
 	mkdir -p capsule/data
 	mkdir -p capsule/results
@@ -195,6 +217,7 @@ process capsule_merge_chunks_toy_pipeline_5 {
 
 	echo "[${task.tag}] cloning git repo..."
 	git clone "https://\$GIT_ACCESS_TOKEN@acmecorp-demo.codeocean.com/capsule-0223110.git" capsule-repo
+	git -C capsule-repo checkout 40fe5e95fc4bee27f92e1969db7a75d4aabe06f2 --quiet
 	mv capsule-repo/code capsule/code
 	rm -rf capsule-repo
 
